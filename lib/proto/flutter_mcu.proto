@@ -1,0 +1,122 @@
+syntax = "proto3";
+// package no.nordicsemi.android.mcumgr_flutter.gen;
+option java_package = "no.nordicsemi.android.mcumgr_flutter.gen";
+
+// Flutter call arguments
+message ProtoUpdateCallArgument {
+  string device_uuid = 1;
+  bytes firmware_data = 2;
+}
+
+message ProtoError {
+    string localizedDescription = 1;
+}
+
+// Firmware image pair
+message Pair {
+    int32 key = 1;
+    bytes value = 2;
+}
+
+message ProtoUpdateWithImageCallArguments {
+    string device_uuid = 1;
+    repeated Pair images = 2;
+    ProtoFirmwareUpgradeConfiguration configuration = 3;
+}
+
+// STATE
+message ProtoUpdateStateChangesStreamArg {
+    string uuid = 1;
+    bool done = 2;
+    ProtoError error = 3;
+    ProtoUpdateStateChanges updateStateChanges = 4;
+}
+
+message ProtoUpdateStateChanges {
+    enum FirmwareUpgradeState {
+        NONE = 0;
+        VALIDATE = 1;
+        UPLOAD = 2;
+        TEST = 3;
+        RESET = 4;
+        CONFIRM = 5;
+        SUCCESS = 6;
+        REQUEST_MCU_MGR_PARAMETERS = 7;
+        ERASE_APP_SETTINGS = 8;
+    }
+
+    FirmwareUpgradeState oldState = 1;
+    FirmwareUpgradeState newState = 2;
+    bool canceled = 3;
+}
+
+message ProtoFirmwareUpgradeConfiguration {
+    enum ImageUploadAlignment {
+        DISABLED = 0;
+        TWO_BYTE = 1;
+        FOUR_BYTE = 2;
+        EIGHT_BYTE = 3;
+        SIXTEEN_BYTE = 4;
+    }
+
+    int64 estimatedSwapTimeMs = 1;
+    bool eraseAppSettings = 2;
+    int64 pipelineDepth = 3;
+    ImageUploadAlignment byteAlignment = 4;
+    uint64 reassemblyBufferSize = 5;
+}
+
+message ProtoProgressUpdateStreamArg {
+    string uuid = 1;
+    bool done = 2;
+    ProtoError error = 3;
+    ProtoProgressUpdate progressUpdate = 4;
+}
+
+message ProtoProgressUpdate {
+    uint64 bytesSent = 1;
+    uint64 imageSize = 2;
+    double timestamp = 3;
+}
+
+// LOGS
+message ProtoLogMessageStreamArg {
+    string uuid = 1;
+    bool done = 2;
+    ProtoError error = 3;
+    repeated ProtoLogMessage protoLogMessage = 4;
+}
+
+message ProtoLogMessage {
+    enum LogCategory {
+        TRANSPORT = 0;
+        CONFIG = 1;
+        CRASH = 2;
+        DEFAULT = 3;
+        FS = 4;
+        IMAGE = 5;
+        LOG = 6;
+        RUN_TEST = 7;
+        STATS = 8;
+        DFU = 9;
+    }
+
+    enum LogLevel {
+        DEBUG = 0;
+        VERBOSE = 1;
+        INFO = 2;
+        APPLICATION = 3;
+        WARNING = 4;
+        ERROR = 5;
+    }
+
+    string message = 1;
+    LogCategory logCategory = 2;
+    LogLevel logLevel = 3;
+    int64 logDateTime = 4;
+}
+
+message ProtoMessageLiveLogEnabled {
+    string uuid = 1;
+    bool enabled = 2;
+}

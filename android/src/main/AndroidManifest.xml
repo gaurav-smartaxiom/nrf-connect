@@ -1,28 +1,3 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <!-- required for API 18 - 30 -->
-    <uses-permission
-        android:name="android.permission.BLUETOOTH"
-        android:maxSdkVersion="30" />
-    <uses-permission
-        android:name="android.permission.BLUETOOTH_ADMIN"
-        android:maxSdkVersion="30" />
-
-    <!-- required for API 23 - 33 -->
-    <uses-permission-sdk-23
-        android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission-sdk-23
-        android:name="android.permission.ACCESS_FINE_LOCATION"/>
-
-    <!-- API 31+ -->
-    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-
-    <!-- add android:usesPermissionFlags="neverForLocation" when you can strongly assert that
-         your app never derives physical location from Bluetooth scan results. -->
-    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
-     <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
-   
-    <application>
-        <service android:name=".DfuService" />
-    </application>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="no.nordicsemi.android.mcumgr_flutter">
 </manifest>

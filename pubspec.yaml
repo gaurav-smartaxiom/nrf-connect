@@ -1,26 +1,33 @@
-name: nordic_dfu
-description: This library allows you to do a Device Firmware Update (DFU) of your nrf51 or nrf52 chip from Nordic Semiconductor. Fork of flutter-nordic-dfu.
-version: 6.1.2
-homepage: https://github.com/juliansteenbakker/nordic_dfu
+name: mcumgr_flutter
+description: nRF Connect Device Manager library is a Flutter plugin based on Android and iOS nRF Connect Device Manager libraries.
+version: 0.1.2+1
+homepage: "https://github.com/NordicSemiconductor/Flutter-nRF-Connect-Device-Manager"
 
 environment:
-  sdk: '>=2.12.0 <4.0.0'
-  flutter: '>=1.10.0'
+  sdk: '>=2.12.0 <3.0.0'
+  flutter: ">=2.0.0"
 
 dependencies:
+  fixnum: ^1.1.0
   flutter:
     sdk: flutter
+  protobuf: ^2.1.0
+  rxdart: ^0.27.7
+  tuple: ^2.0.1
 
 dev_dependencies:
-  lint: ^2.1.2
+  faker: ^2.1.0
+  flutter_test:
+    sdk: flutter
 
 flutter:
   plugin:
     platforms:
       android:
-        package: dev.steenbakker.nordicdfu
-        pluginClass: NordicDfuPlugin
+        package: no.nordicsemi.android.mcumgr_flutter
+        pluginClass: McumgrFlutterPlugin
       ios:
-        pluginClass: NordicDfuPlugin
-      macos:
-        pluginClass: NordicDfuPlugin
+        pluginClass: McumgrFlutterPlugin
+
+  assets:
+    - assets/mock_logs.txt
