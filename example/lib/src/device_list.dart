@@ -1,6 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:nordic_dfu/nordic_dfu.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:mcumgr_flutter_example/src/firmware_list.dart'; 
+import 'package:mcumgr_flutter_example/src/dfuupdate.dart';
 
 class DeviceList extends StatefulWidget {
   @override
@@ -32,7 +37,7 @@ class _DeviceListState extends State<DeviceList> {
       await Future.delayed(Duration(seconds: 5));
       await FlutterBluePlus.stopScan();
 
-      FlutterBluePlus.scanResults.listen((List<ScanResult> results) {
+      scanSubscription = FlutterBluePlus.scanResults.listen((List<ScanResult> results) {
         setState(() {
           scanResults = results;
           print('Discovered devices: $scanResults');
@@ -48,51 +53,56 @@ class _DeviceListState extends State<DeviceList> {
     scanSubscription?.cancel();
   }
 
-  void connectToDevice(BluetoothDevice device) async {
+  Future<void> connectOrDisconnectToDevice(BluetoothDevice device) async {
+    if (isConnected) {
+      // Disconnect the device
+      await disconnectDevice();
+    } else {
+      // Connect to the selected device
+      await connectToDevice(device);
+
+      // Navigate to DfuUpdateScreen when connected
+       _navigateToFirmwareList(device.id.toString());
+    }
+  }
+
+  Future<void> connectToDevice(BluetoothDevice device) async {
     try {
       await device.connect();
       setState(() {
         selectedDevice = device;
       });
-
-      // Navigate to the next screen when connected
-      _navigateToNextScreen();
     } catch (e) {
       print('Error connecting to device: $e');
     }
   }
 
-  void disconnectDevice() async {
+  Future<void> disconnectDevice() async {
     if (selectedDevice != null) {
-      await selectedDevice!.disconnect();
+      try {
+        await selectedDevice!.disconnect();
+      } catch (e) {
+        print('Error disconnecting: $e');
+      }
+
       setState(() {
         selectedDevice = null;
       });
     }
   }
-
-  void _navigateToNextScreen() {
-  if (isConnected) {
+ void _navigateToFirmwareList(String deviceId) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => NextScreen(
-          device: selectedDevice!,
-          onDisconnect: () {
-            // Handle the disconnect logic when returning from NextScreen
-            setState(() {
-              selectedDevice = null;
-            });
-          },
-        ),
+        builder: (context) => FirmwareList(deviceId: deviceId),
       ),
     );
   }
-}
-
 
   @override
   void dispose() {
+    // Disconnect the device when the widget is disposed
+    disconnectDevice();
     // Stop scanning and cancel the subscription when the widget is disposed
     stopScan();
     super.dispose();
@@ -109,14 +119,15 @@ class _DeviceListState extends State<DeviceList> {
           },
           child: Text('Start Scan'),
         ),
-        if (isConnected)
-          ElevatedButton(
-            onPressed: () {
-              // Disconnect the device when the button is pressed
-              disconnectDevice();
-            },
-            child: Text('Disconnect'),
-          ),
+        ElevatedButton(
+          onPressed: () {
+            // Connect or disconnect the device when the button is pressed
+            if (scanResults.isNotEmpty) {
+              connectOrDisconnectToDevice(scanResults.first.device);
+            }
+          },
+          child: Text(isConnected ? 'Disconnect' : 'Connect'),
+        ),
         Expanded(
           child: ListView.builder(
             itemCount: scanResults.length,
@@ -127,8 +138,8 @@ class _DeviceListState extends State<DeviceList> {
                 subtitle: Text(device.id.toString()),
                 trailing: Text('${scanResults[index].rssi} dB'),
                 onTap: () {
-                  // Connect to the selected device
-                  connectToDevice(device);
+                  // Connect or disconnect to/from the selected device when tapped
+                  connectOrDisconnectToDevice(device);
                 },
               );
             },
@@ -141,48 +152,6 @@ class _DeviceListState extends State<DeviceList> {
     );
   }
 }
-
-class NextScreen extends StatelessWidget {
-  final BluetoothDevice device;
-  final void Function() onDisconnect;
-
-  const NextScreen({Key? key, required this.device, required this.onDisconnect})
-      : super(key: key);
-
-  void disconnectAndNavigate(BuildContext context) async {
-    await device.disconnect();
-
-    // Notify the parent (DeviceList) that disconnect happened
-    onDisconnect();
-
-    // Navigate back to the DeviceList screen
-    Navigator.pop(context);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Next Screen'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('Connected to ${device.name}'),
-            ElevatedButton(
-              onPressed: () {
-                disconnectAndNavigate(context);
-              },
-              child: Text('Disconnect'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 
 class MyApp extends StatelessWidget {
   @override
