@@ -6,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:mcumgr_flutter_example/src/firmware_list.dart'; 
 import 'package:mcumgr_flutter_example/src/dfuupdate.dart';
+import 'package:mcumgr_flutter_example/src/update_screen.dart';
 
 class DeviceList extends StatefulWidget {
   @override
@@ -62,7 +63,7 @@ class _DeviceListState extends State<DeviceList> {
       await connectToDevice(device);
 
       // Navigate to DfuUpdateScreen when connected
-       _navigateToFirmwareList(device.id.toString());
+      _navigateToMyAppInternal(device.id.toString());
     }
   }
 
@@ -78,6 +79,7 @@ class _DeviceListState extends State<DeviceList> {
   }
 
   Future<void> disconnectDevice() async {
+    print("device,,,,,,,,,,,,$selectedDevice");
     if (selectedDevice != null) {
       try {
         await selectedDevice!.disconnect();
@@ -90,11 +92,29 @@ class _DeviceListState extends State<DeviceList> {
       });
     }
   }
- void _navigateToFirmwareList(String deviceId) {
+//  
+
+  void initiateDfuForSelectedDevice() async{
+  if (selectedDevice != null) {
+    // Check if the selected device is connected
+    if (isConnected) {
+      // Disconnect the device before starting DFU
+      await disconnectDevice();
+    }
+
+    // Pass the selected device ID to the DFU screen
+    _navigateToMyAppInternal(selectedDevice!.id.toString());
+  }
+}
+
+
+
+void _navigateToMyAppInternal(String deviceId) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => FirmwareList(deviceId: deviceId),
+
+        builder: (context) => MyAppInternal(deviceId: deviceId),
       ),
     );
   }
@@ -137,15 +157,19 @@ class _DeviceListState extends State<DeviceList> {
                 title: Text(device.name ?? 'Unknown'),
                 subtitle: Text(device.id.toString()),
                 trailing: Text('${scanResults[index].rssi} dB'),
-                onTap: () {
-                  // Connect or disconnect to/from the selected device when tapped
-                  connectOrDisconnectToDevice(device);
-                },
+              onTap: () {
+  print('Tapped on device: ${device.name}');
+  print('Device ID: ${device.id}');
+  connectOrDisconnectToDevice(device);
+ _navigateToMyAppInternal(device.id.toString());
+},
+
               );
             },
           ),
         ),
         // Display the selected device information
+        
         if (selectedDevice != null)
           Text('Selected Device: ${selectedDevice!.name}'),
       ],

@@ -11,19 +11,20 @@ environment:
 dependencies:
   platform: ^3.1.0
   flutter_blue_plus: ^1.17.0  
-  nordic_dfu: ^5.2.0
+  nordic_dfu: ^4.0.0
   file_picker: ^4.0.10
   permission_handler: ^11.0.0
+  mcumgr: ^0.0.3
   rxdart: ^0.27.7
-
+  
   path: ^1.8.0
   flutter_archive: ^4.0.1
   path_provider: ^2.0.5
+  open_app_settings: ^2.0.1
   uuid: ^3.0.4
   json_serializable: ^5.0.2
   flutter:
     sdk: flutter
-
   mcumgr_flutter:
     path: ../
 
@@ -52,7 +53,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/
+    - assets/file.zip
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
